@@ -1,0 +1,1226 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>goodme — Data Science Agency</title>
+  <meta name="description" content="goodme: agencia de ciencia de datos. Casos de éxito, servicios y productos de analítica aplicada." />
+
+  <!-- Fonts / Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <!-- Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --panel:#101116;
+      --panel2:#0f1015;
+      --stroke:#2b2c33;
+      --soft:#171824;
+      --text:#e9e9ef;
+      --muted:#a6a7b3;
+      --accent:#4ad7ff;
+      --accent2:#b86bff;
+      --good:#50fa7b;
+      --warn:#ffb86c;
+      --bad:#ff5c7a;
+      --shadow: 0 20px 60px rgba(0,0,0,.55);
+      --radius: 18px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Kanit,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(74,215,255,.10), transparent 60%),
+        radial-gradient(1000px 700px at 90% 20%, rgba(184,107,255,.10), transparent 60%),
+        radial-gradient(900px 600px at 40% 90%, rgba(80,250,123,.07), transparent 60%),
+        linear-gradient(180deg, var(--bg), #07080c 70%);
+      letter-spacing:.02em;
+      overflow-x:hidden;
+    }
+
+    /* Subtle animated grain */
+    .grain{
+      pointer-events:none;
+      position:fixed;
+      inset:-20%;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.15'/%3E%3C/svg%3E");
+      mix-blend-mode:overlay;
+      opacity:.25;
+      transform:translateZ(0);
+      animation: drift 14s linear infinite;
+    }
+    @keyframes drift{
+      0%{transform:translate3d(-2%, -2%, 0)}
+      50%{transform:translate3d(2%, 1%, 0)}
+      100%{transform:translate3d(-2%, -2%, 0)}
+    }
+
+    /* Layout (inspirado en dashboard oscuro) */
+    .container{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns: 270px 1fr;
+      gap:18px;
+      padding:22px;
+      max-width:1280px;
+      margin:0 auto;
+    }
+
+    /* Sidebar */
+    .sidebar{
+      position:sticky;
+      top:22px;
+      align-self:start;
+      background:linear-gradient(180deg, rgba(16,17,22,.92), rgba(10,10,16,.72));
+      border:1px solid rgba(43,44,51,.7);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .brand{
+      padding:18px 18px 14px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      border-bottom:1px solid rgba(43,44,51,.7);
+    }
+    .logo{
+      width:42px;height:42px;
+      border-radius:14px;
+      background:
+        radial-gradient(12px 12px at 30% 30%, rgba(255,255,255,.22), transparent 60%),
+        conic-gradient(from 180deg, var(--accent), var(--accent2), var(--good), var(--accent));
+      box-shadow: 0 12px 35px rgba(74,215,255,.10);
+      position:relative;
+    }
+    .logo::after{
+      content:"";
+      position:absolute;
+      inset:2px;
+      border-radius:12px;
+      background:linear-gradient(180deg, rgba(8,8,12,.55), rgba(8,8,12,.85));
+    }
+
+    .brand h1{
+      margin:0;
+      font-size:1.1rem;
+      line-height:1.1;
+      letter-spacing:.04em;
+    }
+    .brand p{
+      margin:4px 0 0;
+      font-size:.82rem;
+      color:var(--muted);
+    }
+
+    .nav{
+      padding:10px;
+    }
+
+    .nav a{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 12px;
+      margin:6px 0;
+      border-radius:14px;
+      text-decoration:none;
+      color:var(--text);
+      border:1px solid transparent;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .nav a::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(90deg, rgba(74,215,255,.12), transparent 60%);
+      opacity:0;
+      transition:opacity .2s ease;
+    }
+
+    .nav a:hover{
+      transform:translateX(2px);
+      background:rgba(255,255,255,.03);
+      border-color:rgba(43,44,51,.8);
+    }
+    .nav a:hover::before{opacity:1}
+
+    .nav a.active{
+      background:rgba(74,215,255,.08);
+      border-color:rgba(74,215,255,.25);
+    }
+
+    .nav i{color:#c9cad6; width:20px; text-align:center}
+
+    .sidebar-footer{
+      padding:16px;
+      border-top:1px solid rgba(43,44,51,.7);
+      display:grid;
+      gap:10px;
+    }
+
+    .pill{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(43,44,51,.7);
+      background:rgba(255,255,255,.02);
+      color:var(--muted);
+      font-size:.9rem;
+    }
+
+    .pill b{color:var(--text); font-weight:600}
+
+    .cta{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(74,215,255,.26);
+      background:linear-gradient(90deg, rgba(74,215,255,.10), rgba(184,107,255,.08));
+      color:var(--text);
+      text-decoration:none;
+      cursor:pointer;
+      transition: transform .15s ease, filter .15s ease;
+    }
+    .cta:hover{transform:translateY(-1px); filter:brightness(1.05)}
+
+    /* Main */
+    .main{
+      display:grid;
+      gap:18px;
+      grid-template-columns: 1fr;
+      align-content:start;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding:14px 16px;
+      border-radius:var(--radius);
+      border:1px solid rgba(43,44,51,.7);
+      background:linear-gradient(180deg, rgba(16,17,22,.75), rgba(10,10,16,.35));
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar .title{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+    .topbar h2{margin:0; font-size:1.05rem}
+    .topbar .subtitle{margin:0; color:var(--muted); font-size:.9rem}
+
+    .search{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border:1px solid rgba(43,44,51,.7);
+      border-radius:14px;
+      padding:10px 12px;
+      background:rgba(255,255,255,.02);
+      min-width:280px;
+    }
+    .search i{color:#c9cad6}
+    .search input{
+      width:100%;
+      background:transparent;
+      border:0;
+      outline:none;
+      color:var(--text);
+      font-family:inherit;
+      font-size:.95rem;
+    }
+
+    /* Hero */
+    .hero{
+      border-radius:var(--radius);
+      border:1px solid rgba(43,44,51,.7);
+      background:
+        radial-gradient(900px 420px at 20% 20%, rgba(74,215,255,.12), transparent 60%),
+        radial-gradient(700px 420px at 80% 25%, rgba(184,107,255,.12), transparent 55%),
+        linear-gradient(180deg, rgba(16,17,22,.72), rgba(10,10,16,.35));
+      box-shadow:var(--shadow);
+      padding:18px;
+      display:grid;
+      grid-template-columns: 1.4fr .9fr;
+      gap:18px;
+      overflow:hidden;
+      position:relative;
+      backdrop-filter: blur(10px);
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      width:420px;
+      height:420px;
+      right:-140px;
+      top:-140px;
+      background: conic-gradient(from 180deg, rgba(74,215,255,.35), rgba(184,107,255,.30), rgba(80,250,123,.20), rgba(74,215,255,.35));
+      filter: blur(28px);
+      opacity:.32;
+      transform: translateZ(0);
+      animation: halo 10s ease-in-out infinite;
+    }
+    @keyframes halo{
+      0%{transform:translate3d(0,0,0) rotate(0deg)}
+      50%{transform:translate3d(-12px, 14px, 0) rotate(12deg)}
+      100%{transform:translate3d(0,0,0) rotate(0deg)}
+    }
+
+    .hero h3{
+      margin:0;
+      font-size:1.5rem;
+      letter-spacing:.02em;
+    }
+    .hero p{
+      margin:10px 0 0;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .hero .bullets{
+      margin:14px 0 0;
+      padding:0;
+      list-style:none;
+      display:grid;
+      gap:8px;
+    }
+    .hero .bullets li{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      color:#cfd0da;
+    }
+    .hero .bullets i{color:var(--accent); margin-top:3px}
+
+    .hero-actions{
+      margin-top:16px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:1px solid rgba(43,44,51,.7);
+      background:rgba(255,255,255,.02);
+      color:var(--text);
+      border-radius:14px;
+      padding:10px 12px;
+      text-decoration:none;
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      cursor:pointer;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    }
+    .btn:hover{transform:translateY(-1px); border-color:rgba(74,215,255,.25)}
+    .btn.primary{
+      border-color:rgba(74,215,255,.35);
+      background:linear-gradient(90deg, rgba(74,215,255,.12), rgba(184,107,255,.08));
+    }
+
+    /* KPI cards */
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:12px;
+      position:relative;
+      z-index:1;
+    }
+
+    .kpi{
+      border-radius:16px;
+      border:1px solid rgba(43,44,51,.7);
+      background:rgba(255,255,255,.02);
+      padding:12px;
+      display:grid;
+      gap:8px;
+      min-height:92px;
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    .kpi:hover{transform:translateY(-2px); border-color:rgba(184,107,255,.22)}
+
+    .kpi .label{color:var(--muted); font-size:.85rem}
+    .kpi .value{font-size:1.25rem; font-weight:700}
+    .kpi .delta{font-size:.85rem; color:#cfd0da}
+    .kpi .delta .up{color:var(--good)}
+    .kpi .delta .down{color:var(--bad)}
+
+    /* Sections grid */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .card{
+      border-radius:var(--radius);
+      border:1px solid rgba(43,44,51,.7);
+      background:linear-gradient(180deg, rgba(16,17,22,.70), rgba(10,10,16,.35));
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+
+    .card-header{
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom:1px solid rgba(43,44,51,.7);
+    }
+
+    .card-header h4{margin:0; font-size:1.0rem}
+    .card-header .meta{color:var(--muted); font-size:.86rem}
+
+    .card-body{padding:16px}
+
+    .chart-wrap{height:250px}
+
+    .tags{display:flex; gap:8px; flex-wrap:wrap}
+    .tag{
+      font-size:.82rem;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(43,44,51,.7);
+      background:rgba(255,255,255,.02);
+      color:#cfd0da;
+      cursor:pointer;
+      transition: transform .15s ease, border-color .15s ease;
+      user-select:none;
+    }
+    .tag:hover{transform:translateY(-1px); border-color:rgba(74,215,255,.25)}
+    .tag.active{border-color:rgba(74,215,255,.35); background:rgba(74,215,255,.08)}
+
+    /* Case studies */
+    .cases{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:12px;
+    }
+
+    .case{
+      border:1px solid rgba(43,44,51,.7);
+      border-radius:16px;
+      background:rgba(255,255,255,.02);
+      padding:14px;
+      display:grid;
+      gap:10px;
+      min-height:170px;
+      transition: transform .15s ease, border-color .15s ease;
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .case::after{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      background:radial-gradient(400px 220px at 30% 20%, rgba(74,215,255,.10), transparent 60%);
+      opacity:0;
+      transition:opacity .2s ease;
+    }
+
+    .case:hover{transform:translateY(-2px); border-color:rgba(74,215,255,.22)}
+    .case:hover::after{opacity:1}
+
+    .case h5{margin:0; font-size:1.02rem; position:relative; z-index:1}
+    .case p{margin:0; color:var(--muted); line-height:1.35; position:relative; z-index:1}
+
+    .case .kpis-mini{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      position:relative;
+      z-index:1
+    }
+    .mini{
+      border:1px solid rgba(43,44,51,.7);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:.82rem;
+      color:#cfd0da;
+      background:rgba(0,0,0,.12);
+    }
+    .mini b{color:var(--text)}
+
+    /* Right column: services */
+    .services{display:grid; gap:10px}
+    .service{
+      border:1px solid rgba(43,44,51,.7);
+      border-radius:16px;
+      background:rgba(255,255,255,.02);
+      padding:12px;
+      display:grid;
+      gap:6px;
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    .service:hover{transform:translateY(-1px); border-color:rgba(184,107,255,.22)}
+    .service .line{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .service .line i{color:#c9cad6}
+    .service .desc{color:var(--muted); margin:0; line-height:1.35; font-size:.92rem}
+
+    /* Contact */
+    .contact{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    .field{
+      display:grid;
+      gap:6px;
+    }
+    .field label{color:var(--muted); font-size:.86rem}
+    .field input,.field textarea{
+      border-radius:14px;
+      border:1px solid rgba(43,44,51,.7);
+      background:rgba(255,255,255,.02);
+      padding:10px 12px;
+      color:var(--text);
+      outline:none;
+      font-family:inherit;
+    }
+    .field textarea{min-height:110px; resize:vertical; grid-column:1 / -1}
+
+    .toast{
+      position:fixed;
+      bottom:16px;
+      right:16px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(74,215,255,.35);
+      background:rgba(16,17,22,.75);
+      box-shadow:var(--shadow);
+      color:var(--text);
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      max-width:380px;
+      opacity:0;
+      transform:translateY(8px);
+      pointer-events:none;
+      transition: opacity .2s ease, transform .2s ease;
+      z-index:999;
+      backdrop-filter: blur(10px);
+    }
+    .toast.show{opacity:1; transform:translateY(0)}
+    .toast .small{color:var(--muted); font-size:.9rem}
+
+    /* Modal */
+    dialog{
+      width:min(880px, 92vw);
+      border:1px solid rgba(43,44,51,.7);
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(16,17,22,.92), rgba(10,10,16,.88));
+      color:var(--text);
+      box-shadow:var(--shadow);
+      padding:0;
+      overflow:hidden;
+    }
+    dialog::backdrop{background:rgba(0,0,0,.65)}
+
+    .modal-head{
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom:1px solid rgba(43,44,51,.7);
+    }
+    .modal-head h3{margin:0; font-size:1.05rem}
+    .icon-btn{
+      border:1px solid rgba(43,44,51,.7);
+      background:rgba(255,255,255,.02);
+      color:var(--text);
+      width:40px;
+      height:40px;
+      border-radius:14px;
+      cursor:pointer;
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    .icon-btn:hover{transform:translateY(-1px); border-color:rgba(74,215,255,.25)}
+
+    .modal-body{padding:16px; display:grid; gap:14px}
+
+    .two-col{display:grid; grid-template-columns: 1.2fr .8fr; gap:12px}
+    .bul{margin:0; padding-left:18px; color:#cfd0da; line-height:1.45}
+    .bul li{margin:6px 0}
+
+    .metric-grid{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px}
+    .metric{
+      border:1px solid rgba(43,44,51,.7);
+      border-radius:16px;
+      background:rgba(255,255,255,.02);
+      padding:12px;
+      display:grid;
+      gap:6px;
+    }
+    .metric .label{color:var(--muted); font-size:.85rem}
+    .metric .value{font-weight:700; font-size:1.1rem}
+
+    /* Reveal on scroll */
+    .reveal{opacity:0; transform:translateY(10px); transition:opacity .45s ease, transform .45s ease}
+    .reveal.in{opacity:1; transform:translateY(0)}
+
+    /* Mobile */
+    .mobilebar{display:none}
+
+    @media (max-width: 980px){
+      .container{grid-template-columns: 1fr; padding:14px}
+      .sidebar{position:fixed; inset:14px 14px auto 14px; z-index:999; transform:translateY(-120%); transition:transform .25s ease}
+      .sidebar.open{transform:translateY(0)}
+      .mobilebar{display:flex; align-items:center; justify-content:space-between; gap:10px}
+      .topbar{position:sticky; top:14px; z-index:50}
+      .search{min-width: 0; flex:1}
+      .hero{grid-template-columns:1fr}
+      .grid{grid-template-columns:1fr}
+      .cases{grid-template-columns:1fr}
+      .contact{grid-template-columns:1fr}
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *{animation:none !important; transition:none !important; scroll-behavior:auto !important}
+      .grain{display:none}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="grain"></div>
+
+  <div class="container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>goodme</h1>
+          <p>Data Science Agency</p>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Navegación">
+        <a class="active" href="#inicio" data-nav><i class="fa fa-fw fa-area-chart"></i> Panel</a>
+        <a href="#casos" data-nav><i class="fa fa-fw fa-trophy"></i> Casos de éxito</a>
+        <a href="#servicios" data-nav><i class="fa fa-fw fa-cubes"></i> Servicios</a>
+        <a href="#insights" data-nav><i class="fa fa-fw fa-newspaper-o"></i> Insights</a>
+        <a href="#contacto" data-nav><i class="fa fa-fw fa-envelope"></i> Contacto</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="pill"><span>Estado</span> <b><span style="color:var(--good)">Operativo</span></b></div>
+        <div class="pill"><span>Última ejecución</span> <b id="lastRun">hoy</b></div>
+        <a class="cta" href="#contacto" data-nav><i class="fa fa-fw fa-paper-plane-o"></i> Hablar con goodme</a>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main" id="inicio">
+
+      <header class="topbar">
+        <div class="mobilebar">
+          <button class="icon-btn" id="menuBtn" aria-label="Abrir menú"><i class="fa fa-bars"></i></button>
+          <div style="display:flex; align-items:center; gap:10px">
+            <span style="opacity:.9; font-weight:700">goodme</span>
+          </div>
+        </div>
+
+        <div class="title">
+          <h2>Agencia de ciencia de datos, con mentalidad de producto</h2>
+          <p class="subtitle">De datos sucios a decisiones claras: modelos, analítica y automatización.</p>
+        </div>
+
+        <div class="search" role="search">
+          <i class="fa fa-search" aria-hidden="true"></i>
+          <input id="search" type="search" placeholder="Buscar: churn, fraude, demanda…" autocomplete="off" />
+        </div>
+      </header>
+
+      <section class="hero reveal">
+        <div style="position:relative; z-index:1">
+          <h3>convertimos ruido en señal.</h3>
+          <p>
+            Trabajamos como una agencia pequeña, rápida y exigente: exploración, modelado, despliegue y medición.
+            Sin humo. Si no genera impacto, no se entrega.
+          </p>
+
+          <ul class="bullets">
+            <li><i class="fa fa-fw fa-check"></i><span><b>Entrega en semanas</b>, no en trimestres: MVP analítico + iteración.</span></li>
+            <li><i class="fa fa-fw fa-check"></i><span><b>Modelos auditables</b>: explicabilidad, trazabilidad y control de drift.</span></li>
+            <li><i class="fa fa-fw fa-check"></i><span><b>Producto</b>: dashboard + API + documentación para que no dependas de nosotros.</span></li>
+          </ul>
+
+          <div class="hero-actions">
+            <a class="btn primary" href="#casos" data-nav><i class="fa fa-fw fa-trophy"></i> Ver casos de éxito</a>
+            <a class="btn" href="#servicios" data-nav><i class="fa fa-fw fa-cubes"></i> Ver servicios</a>
+            <button class="btn" id="demoBtn"><i class="fa fa-fw fa-bolt"></i> Simular demo</button>
+          </div>
+        </div>
+
+        <div class="kpis" aria-label="Indicadores">
+          <div class="kpi">
+            <div class="label">ROI estimado (proyectos)</div>
+            <div class="value">3.6×</div>
+            <div class="delta"><span class="up">▲</span> +0.4× vs Q anterior</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Tiempo a valor</div>
+            <div class="value">21 días</div>
+            <div class="delta"><span class="up">▲</span> -6 días media</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Modelos en producción</div>
+            <div class="value">12</div>
+            <div class="delta"><span class="up">▲</span> +3 este año</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Calidad de datos</div>
+            <div class="value">92%</div>
+            <div class="delta"><span class="up">▲</span> +7 pts tras limpieza</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="card reveal" id="insights">
+          <div class="card-header">
+            <div>
+              <h4>Impacto en el tiempo</h4>
+              <div class="meta">Resultados agregados (simulados) de los últimos 12 meses</div>
+            </div>
+            <div class="tags" aria-label="Filtros">
+              <div class="tag active" data-series="impact">Impacto</div>
+              <div class="tag" data-series="cost">Coste</div>
+              <div class="tag" data-series="reliability">Fiabilidad</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrap"><canvas id="line"></canvas></div>
+          </div>
+        </div>
+
+        <aside class="card reveal" id="servicios">
+          <div class="card-header">
+            <div>
+              <h4>Servicios</h4>
+              <div class="meta">Paquetes claros, entregables medibles</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="services">
+              <div class="service">
+                <div class="line"><b><i class="fa fa-fw fa-database"></i> Diagnóstico de datos</b><span class="mini"><b>2</b> semanas</span></div>
+                <p class="desc">Mapa de fuentes, calidad, diccionario mínimo viable y plan de mejoras.</p>
+              </div>
+              <div class="service">
+                <div class="line"><b><i class="fa fa-fw fa-line-chart"></i> Modelos predictivos</b><span class="mini"><b>AUC</b> ≥ 0.78</span></div>
+                <p class="desc">Churn, fraude, demanda, scoring. Con explicabilidad y monitorización.</p>
+              </div>
+              <div class="service">
+                <div class="line"><b><i class="fa fa-fw fa-cogs"></i> Automatización</b><span class="mini"><b>-35%</b> tiempo</span></div>
+                <p class="desc">Pipelines, alertas, jobs programados y entrega por API / dashboard.</p>
+              </div>
+              <div class="service">
+                <div class="line"><b><i class="fa fa-fw fa-shield"></i> Gobernanza & IA responsable</b><span class="mini"><b>Audit</b> ready</span></div>
+                <p class="desc">Trazabilidad, riesgos, sesgos, control de cambios y documentación técnica.</p>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="card reveal" id="casos" aria-label="Casos de estudio">
+        <div class="card-header">
+          <div>
+            <h4>Casos de estudio (simulados)</h4>
+            <div class="meta">3 proyectos que muestran el tipo de impacto que entregamos.</div>
+          </div>
+          <div class="meta" id="searchHint">Tip: escribe arriba “churn”, “fraude” o “demanda”.</div>
+        </div>
+        <div class="card-body">
+          <div class="cases" id="cases">
+            <article class="case" tabindex="0" role="button" data-case="retail">
+              <h5>Retail: predicción de demanda multitienda</h5>
+              <p>Forecast semanal + optimización de stock. Menos roturas y menos inmovilizado.</p>
+              <div class="kpis-mini">
+                <span class="mini"><b>-18%</b> roturas</span>
+                <span class="mini"><b>-12%</b> stock</span>
+                <span class="mini"><b>MAPE</b> 9.4</span>
+              </div>
+            </article>
+            <article class="case" tabindex="0" role="button" data-case="fintech">
+              <h5>Fintech: detección de fraude en tiempo real</h5>
+              <p>Scoring streaming + reglas adaptativas. Detiene fraude sin castigar al cliente bueno.</p>
+              <div class="kpis-mini">
+                <span class="mini"><b>+41%</b> recall</span>
+                <span class="mini"><b>-27%</b> falsos positivos</span>
+                <span class="mini"><b>Lat.</b> 120ms</span>
+              </div>
+            </article>
+            <article class="case" tabindex="0" role="button" data-case="telco">
+              <h5>Telco: churn y retención personalizada</h5>
+              <p>Modelos interpretables + campañas por propensión. Retención sin descuentos absurdos.</p>
+              <div class="kpis-mini">
+                <span class="mini"><b>-9.6%</b> churn</span>
+                <span class="mini"><b>+2.1×</b> lift</span>
+                <span class="mini"><b>NPS</b> +6</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="card reveal" id="contacto" aria-label="Contacto">
+        <div class="card-header">
+          <div>
+            <h4>Contacto</h4>
+            <div class="meta">Cuéntanos tu problema: respondemos con un plan concreto.</div>
+          </div>
+          <div class="meta">Tiempo típico de respuesta: 24–48h</div>
+        </div>
+        <div class="card-body">
+          <form id="contactForm" class="contact">
+            <div class="field">
+              <label for="name">Nombre</label>
+              <input id="name" name="name" placeholder="Tu nombre" required />
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" placeholder="tucorreo@dominio.com" required />
+            </div>
+            <div class="field" style="grid-column:1/-1">
+              <label for="message">Qué quieres conseguir</label>
+              <textarea id="message" name="message" placeholder="Ejemplo: reducir churn, predecir demanda, automatizar reporting, detectar fraude…" required></textarea>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center; grid-column:1/-1; justify-content:flex-end">
+              <button class="btn" type="reset"><i class="fa fa-fw fa-undo"></i> Limpiar</button>
+              <button class="btn primary" type="submit"><i class="fa fa-fw fa-paper-plane-o"></i> Enviar</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <div style="color:var(--muted); font-size:.9rem; padding:4px 2px 18px">
+        © <span id="year"></span> goodme — Agencia de ciencia de datos. (Demo/landing con datos simulados.)
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <dialog id="caseModal" aria-label="Detalle de caso">
+    <div class="modal-head">
+      <h3 id="modalTitle">Caso</h3>
+      <button class="icon-btn" id="closeModal" aria-label="Cerrar"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="two-col">
+        <div>
+          <div class="tags" style="margin-bottom:10px">
+            <span class="tag active" id="pillIndustry">Industria</span>
+            <span class="tag" id="pillStack">Stack</span>
+            <span class="tag" id="pillDeliverables">Entregables</span>
+          </div>
+          <p id="modalSummary" style="margin:0; color:var(--muted); line-height:1.5"></p>
+          <ul class="bul" id="modalBullets"></ul>
+        </div>
+        <div class="metric-grid" id="modalMetrics"></div>
+      </div>
+      <div class="card" style="border-radius:16px">
+        <div class="card-header">
+          <h4 style="margin:0">Evolución (simulada)</h4>
+          <div class="meta">antes → después</div>
+        </div>
+        <div class="card-body">
+          <div class="chart-wrap" style="height:210px"><canvas id="modalChart"></canvas></div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px">
+        <a class="btn" href="#contacto" data-nav><i class="fa fa-fw fa-envelope"></i> Quiero algo así</a>
+        <button class="btn primary" id="copyPitch"><i class="fa fa-fw fa-copy"></i> Copiar pitch</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <i class="fa fa-fw fa-info-circle" style="color:var(--accent)"></i>
+    <div>
+      <div id="toastTitle" style="font-weight:700">Listo</div>
+      <div class="small" id="toastMsg">Acción completada.</div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Utilities
+    const $ = (q, el=document) => el.querySelector(q);
+    const $$ = (q, el=document) => [...el.querySelectorAll(q)];
+
+    const toast = (title, msg) => {
+      const t = $('#toast');
+      $('#toastTitle').textContent = title;
+      $('#toastMsg').textContent = msg;
+      t.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+    };
+
+    // ---------- Sidebar mobile
+    const sidebar = $('#sidebar');
+    const menuBtn = $('#menuBtn');
+    if(menuBtn){
+      menuBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
+    }
+
+    const closeSidebarIfMobile = () => {
+      if(window.matchMedia('(max-width: 980px)').matches){
+        sidebar.classList.remove('open');
+      }
+    };
+
+    // Smooth nav
+    $$('[data-nav]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const href = a.getAttribute('href');
+        if(!href || !href.startsWith('#')) return;
+        e.preventDefault();
+        const el = document.querySelector(href);
+        if(el){
+          el.scrollIntoView({behavior:'smooth', block:'start'});
+          closeSidebarIfMobile();
+          // active state
+          $$('nav.nav a').forEach(x => x.classList.remove('active'));
+          const navLink = $$('nav.nav a').find(x => x.getAttribute('href') === href);
+          if(navLink) navLink.classList.add('active');
+        }
+      });
+    });
+
+    // Reveal on scroll
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if(en.isIntersecting){
+          en.target.classList.add('in');
+          io.unobserve(en.target);
+        }
+      });
+    }, {threshold: 0.12});
+    $$('.reveal').forEach(el => io.observe(el));
+
+    // Footer date
+    $('#year').textContent = new Date().getFullYear();
+    const now = new Date();
+    $('#lastRun').textContent = now.toLocaleDateString('es-ES', {day:'2-digit', month:'2-digit', year:'numeric'});
+
+    // ---------- Charts
+    const baseChartOpts = {
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{mode:'index', intersect:false}
+      },
+      interaction:{mode:'index', intersect:false},
+      scales:{
+        x:{
+          grid:{color:'rgba(255,255,255,.05)'},
+          ticks:{color:'rgba(233,233,239,.72)'}
+        },
+        y:{
+          grid:{color:'rgba(255,255,255,.05)'},
+          ticks:{color:'rgba(233,233,239,.72)'}
+        }
+      }
+    };
+
+    const labels = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const series = {
+      impact: [12,15,18,22,24,28,31,33,36,40,42,46],
+      cost:   [28,27,26,25,24,23,22,21,20,19,18,17],
+      reliability:[78,80,81,83,85,86,88,89,90,92,93,94]
+    };
+
+    const lineCtx = $('#line');
+    const lineChart = new Chart(lineCtx, {
+      type:'line',
+      data:{
+        labels,
+        datasets:[{
+          label:'Impacto',
+          data:series.impact,
+          borderWidth:2,
+          pointRadius:2,
+          tension:.35,
+          fill:true,
+          backgroundColor:'rgba(74,215,255,.08)',
+          borderColor:'rgba(74,215,255,.85)',
+        }]
+      },
+      options:baseChartOpts
+    });
+
+    const setLineSeries = (key) => {
+      const ds = lineChart.data.datasets[0];
+      ds.data = series[key];
+      ds.label = key === 'impact' ? 'Impacto' : key === 'cost' ? 'Coste' : 'Fiabilidad';
+      ds.backgroundColor = key === 'impact' ? 'rgba(74,215,255,.08)' : key === 'cost' ? 'rgba(255,184,108,.08)' : 'rgba(80,250,123,.08)';
+      ds.borderColor = key === 'impact' ? 'rgba(74,215,255,.85)' : key === 'cost' ? 'rgba(255,184,108,.85)' : 'rgba(80,250,123,.85)';
+      lineChart.update();
+    };
+
+    $$('.tag[data-series]').forEach(t => {
+      t.addEventListener('click', () => {
+        $$('.tag[data-series]').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        setLineSeries(t.dataset.series);
+        toast('Filtro aplicado', `Serie: ${t.textContent.trim()}`);
+      });
+    });
+
+    // ---------- Case studies data
+    const CASES = {
+      retail: {
+        title: 'Retail: predicción de demanda multitienda',
+        industry: 'Retail & logística',
+        stack: 'Python · Prophet/XGBoost · SQL · Airflow · Power BI',
+        deliverables: 'Forecast + plan de reposición + dashboard + API',
+        summary: 'Unificamos ventas, promociones, roturas y calendario para predecir demanda semanal por tienda. El sistema propone reposición y alerta de outliers para evitar decisiones a ciegas.',
+        bullets: [
+          'Normalización de fuentes y métricas (ventas netas, roturas, lead time).',
+          'Modelos por clúster de tiendas y detección de campañas atípicas.',
+          'Monitorización de error (MAPE) y reentrenos programados.',
+          'Dashboard operativo para compras y tienda: qué pedir, cuándo y por qué.'
+        ],
+        metrics: [
+          {label:'Roturas', value:'-18%'},
+          {label:'Stock inmovilizado', value:'-12%'},
+          {label:'MAPE', value:'9.4'},
+          {label:'Tiempo a valor', value:'19 días'}
+        ],
+        chart: {labels:['Antes','Después'], values:[100,82]}
+      },
+      fintech: {
+        title: 'Fintech: detección de fraude en tiempo real',
+        industry: 'Fintech',
+        stack: 'Python · LightGBM · Kafka · Feature Store · Docker',
+        deliverables: 'Scoring streaming + reglas + monitorización',
+        summary: 'Construimos un scoring en streaming con features en ventana (1m/5m/1h). Se reduce el fraude sin disparar falsos positivos, con auditoría de decisiones y control de drift.',
+        bullets: [
+          'Features en tiempo real: velocity, device fingerprint, secuencia de eventos.',
+          'Estrategia híbrida: modelo + reglas calibradas y versionadas.',
+          'Tiempos de respuesta < 150ms con despliegue containerizado.',
+          'Cuadro de mando de fraude: precisión, recall, drift y alertas.'
+        ],
+        metrics: [
+          {label:'Recall', value:'+41%'},
+          {label:'Falsos positivos', value:'-27%'},
+          {label:'Latencia', value:'120ms'},
+          {label:'Ahorro estimado', value:'€320k/año'}
+        ],
+        chart: {labels:['Antes','Después'], values:[100,63]}
+      },
+      telco: {
+        title: 'Telco: churn y retención personalizada',
+        industry: 'Telecom',
+        stack: 'Python · SHAP · SQL · Experimentación · CRM',
+        deliverables: 'Modelo churn + segmentación + campañas A/B',
+        summary: 'Modelo interpretable para churn con explicación por cliente. Se diseñan acciones de retención por propensión, priorizando valor y evitando descuentos indiscriminados.',
+        bullets: [
+          'Dataset de comportamiento, incidencias, facturación y soporte.',
+          'Explicabilidad por cliente (SHAP) para acciones coherentes.',
+          'Segmentos: riesgo alto, riesgo medio y “sano” (no molestar).',
+          'Experimentos A/B para demostrar impacto real, no historias.'
+        ],
+        metrics: [
+          {label:'Churn', value:'-9.6%'},
+          {label:'Lift', value:'2.1×'},
+          {label:'NPS', value:'+6'},
+          {label:'Campañas', value:'4 iteraciones'}
+        ],
+        chart: {labels:['Antes','Después'], values:[100,90.4]}
+      }
+    };
+
+    // ---------- Modal handling
+    const modal = $('#caseModal');
+    const closeModal = $('#closeModal');
+    const modalTitle = $('#modalTitle');
+    const modalSummary = $('#modalSummary');
+    const modalBullets = $('#modalBullets');
+    const modalMetrics = $('#modalMetrics');
+    const pillIndustry = $('#pillIndustry');
+    const pillStack = $('#pillStack');
+    const pillDeliverables = $('#pillDeliverables');
+
+    let modalChart;
+
+    const openCase = (key) => {
+      const c = CASES[key];
+      if(!c) return;
+
+      modalTitle.textContent = c.title;
+      modalSummary.textContent = c.summary;
+
+      pillIndustry.textContent = c.industry;
+      pillStack.textContent = c.stack;
+      pillDeliverables.textContent = c.deliverables;
+
+      modalBullets.innerHTML = c.bullets.map(x => `<li>${x}</li>`).join('');
+      modalMetrics.innerHTML = c.metrics.map(m => `
+        <div class="metric">
+          <div class="label">${m.label}</div>
+          <div class="value">${m.value}</div>
+        </div>
+      `).join('');
+
+      const ctx = $('#modalChart');
+      if(modalChart){ modalChart.destroy(); }
+      modalChart = new Chart(ctx, {
+        type:'bar',
+        data:{
+          labels:c.chart.labels,
+          datasets:[{
+            label:'Índice',
+            data:c.chart.values,
+            borderWidth:1,
+            backgroundColor:['rgba(74,215,255,.20)','rgba(80,250,123,.20)'],
+            borderColor:['rgba(74,215,255,.85)','rgba(80,250,123,.85)']
+          }]
+        },
+        options:{
+          ...baseChartOpts,
+          plugins:{...baseChartOpts.plugins, legend:{display:false}},
+          scales:{
+            x:{grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'rgba(233,233,239,.72)'}},
+            y:{grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'rgba(233,233,239,.72)'}, suggestedMin:0, suggestedMax:110}
+          }
+        }
+      });
+
+      modal.showModal();
+    };
+
+    closeModal.addEventListener('click', () => modal.close());
+    modal.addEventListener('click', (e) => {
+      const r = modal.getBoundingClientRect();
+      const inside = (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom);
+      if(!inside) modal.close();
+    });
+
+    $$('#cases .case').forEach(card => {
+      const open = () => openCase(card.dataset.case);
+      card.addEventListener('click', open);
+      card.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); }
+      });
+    });
+
+    // Copy pitch
+    $('#copyPitch').addEventListener('click', async () => {
+      const txt = `goodme — ${modalTitle.textContent}\n\n${modalSummary.textContent}\n\nEntregables: ${pillDeliverables.textContent}\nStack: ${pillStack.textContent}`;
+      try{
+        await navigator.clipboard.writeText(txt);
+        toast('Copiado', 'Pitch copiado al portapapeles.');
+      }catch{
+        toast('Bloqueado', 'Tu navegador no permite copiar automáticamente.');
+      }
+    });
+
+    // ---------- Search (filters cases)
+    const search = $('#search');
+    const searchHint = $('#searchHint');
+
+    const applySearch = (q) => {
+      q = (q||'').toLowerCase().trim();
+      const cards = $$('#cases .case');
+      if(!q){
+        cards.forEach(c => c.style.display='');
+        searchHint.textContent = 'Tip: escribe arriba “churn”, “fraude” o “demanda”.';
+        return;
+      }
+
+      const map = {
+        churn: ['telco'],
+        fraude: ['fintech'],
+        demanda: ['retail'],
+        retail: ['retail'],
+        fintech: ['fintech'],
+        telco: ['telco']
+      };
+
+      const allowed = new Set(map[q] || []);
+      cards.forEach(c => {
+        const ok = allowed.size ? allowed.has(c.dataset.case) : (c.textContent.toLowerCase().includes(q));
+        c.style.display = ok ? '' : 'none';
+      });
+
+      searchHint.textContent = allowed.size ? `Filtrado por: “${q}”.` : `Búsqueda: “${q}”.`;
+    };
+
+    search.addEventListener('input', () => applySearch(search.value));
+
+    // ---------- Demo button (fake event stream)
+    $('#demoBtn').addEventListener('click', () => {
+      const modes = ['impact','cost','reliability'];
+      const pick = modes[Math.floor(Math.random()*modes.length)];
+      $$('.tag[data-series]').forEach(x => x.classList.toggle('active', x.dataset.series === pick));
+      setLineSeries(pick);
+
+      const msg = pick === 'impact'
+        ? 'Simulación: sube el impacto por mejoras de retención.'
+        : pick === 'cost'
+          ? 'Simulación: cae el coste tras automatizar pipelines.'
+          : 'Simulación: mejora la fiabilidad por control de drift.';
+      toast('Demo', msg);
+    });
+
+    // ---------- Contact (client-side only)
+    $('#contactForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = $('#name').value.trim();
+      const email = $('#email').value.trim();
+      toast('Enviado (demo)', `Gracias, ${name || 'equipo'}. Te contactaremos en ${email || 'tu email'} (simulado).`);
+      e.target.reset();
+    });
+
+    // ---------- Reduce distractions: auto-close sidebar when resizing desktop
+    window.addEventListener('resize', () => {
+      if(!window.matchMedia('(max-width: 980px)').matches){
+        sidebar.classList.remove('open');
+      }
+    });
+  </script>
+</body>
+</html>
